@@ -1,6 +1,7 @@
 datasource db {
   provider = "postgresql"
 }
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,4 +15,38 @@ model User {
   hashedPassword String
   updatedAt      DateTime @updatedAt
   emailVerified  Boolean  @default(false)
+}
+
+model Yield {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  maturity String
+  value    Float
+  date     DateTime
+
+  @@unique([date, maturity])
+  @@index([date])
+  @@index([maturity])
+}
+
+model Prediction {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  maturity      String
+  value         Float
+  asOfDate      DateTime
+  predictedDate DateTime
+
+  modelType String
+  horizon   Int
+
+  @@unique([predictedDate, asOfDate, maturity, modelType, horizon])
+  @@index([predictedDate])
+  @@index([maturity])
+  @@index([modelType])
+  @@index([horizon])
 }
