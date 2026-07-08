@@ -36,6 +36,8 @@ app.get("/", async (req, res) => {
     res.send({"status": "ok"});
 });
 
+
+//auth register
 app.post("/api/auth/register", async (req,res,next) => {
     //user table -> id,name, email, hashed_password, created_at, updated_at, email_verified
 
@@ -68,6 +70,7 @@ app.post("/api/auth/register", async (req,res,next) => {
 
 });
 
+//auth login, give a jwt
 app.post("/api/auth/login", async (req,res,next) => {
     try{
         const body = loginUserSchema.parse(req.body);
@@ -81,7 +84,7 @@ app.post("/api/auth/login", async (req,res,next) => {
         if (!username && !email){
             return res.status(400).json({error: "Email or username is required"})
         }
-        const password = body.password;
+        let password = body.password;
         let user;
         if (username){
             user = await prisma.user.findUnique({
@@ -97,13 +100,15 @@ app.post("/api/auth/login", async (req,res,next) => {
                 }
             })
         }
+
+
         if (!user){
-            return res.status(400).json({error: "Invalid username/email or password"})
+            return res.status(401).json({error: "Invalid username/email or password"})
         }
 
-        const password = await argon2.verify(user.hashedPassword, password);
+        password = await argon2.verify(user.hashedPassword, password);
         if (!password){
-            return res.status(400).json({error: "Invalid username/email or password"})
+            return res.status(401).json({error: "Invalid username/email or password"})
         }
 
 
@@ -123,6 +128,8 @@ app.post("/api/auth/login", async (req,res,next) => {
     }
 });
 
+
+//auth verify a jwt
 app.post("/api/auth/me", async (req,res,next) => {
     try{
         const authHeader = req.headers.authorization;
@@ -133,6 +140,10 @@ app.post("/api/auth/me", async (req,res,next) => {
 
         const token = authHeader.split(" ")[1];
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+        if (!decoded || !decoded.userId){
+            return res.status(401).json({error: "unauthenticated"});
+        } 
 
         const user = await prisma.user.findUnique({
             where: {
