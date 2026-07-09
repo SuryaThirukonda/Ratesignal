@@ -2,7 +2,8 @@ import express from "express";
 import "dotenv/config";
 import PrismaPkg from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { createMaturitySchema, getMaturitySchema } from "../schema.js";
+import { createMaturitySchema, getMaturitySchema,createMaturitySchemaBatch } from "../schema.js";
+import { _isoDateTime } from "zod/v4/core";
 const { PrismaClient } = PrismaPkg;
 const adapter = new PrismaPg({
   connectionString: process.env.NEON_CONNECTION_STRING,
@@ -26,6 +27,7 @@ const parseDate = (value) => {
 
 
 const router = express.Router();
+
 
 
 router.get("/", async (req,res,next)=> {
@@ -64,6 +66,37 @@ router.get("/", async (req,res,next)=> {
         return res.status(200).json(mat);
 
 
+    }catch(err){
+        next(err);
+    }
+
+});
+
+router.post("/batch/", async (req,res,next)=>{
+    try{
+        
+        const result = createMaturitySchemaBatch.safeParse(req.body);
+
+        if (!result.success){
+            return res.status(400).json({error: "Invalid input", issues: result.error.issues});
+        }
+
+        const rows = result.data.items.map((item) => ({
+            date: new Date(item.date),
+            maturity: item.maturity,
+            value: item.value
+        }));
+
+        const maturities = await prisma.yield.createMany({
+            data: rows,
+            skipDuplicates: true
+
+        });
+
+        return res.status(201).json({
+            inserted: maturities.count,
+            recieved: rows.length
+        })
     }catch(err){
         next(err);
     }

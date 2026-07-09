@@ -1,7 +1,7 @@
 import requests
-import pandas as pd
 import json
-import time
+import pandas as pd
+
 
 df = pd.read_csv("backend\\data\\FRB_H15.csv").dropna()
 
@@ -11,50 +11,21 @@ df = df.reset_index(drop=True)
 
 print(df.head())
 
+'''
+dates = [
+    {
+        "maturity": "1Y",
+        "date" : "2026-07-09",
+        "value": 4.12
+    },
+    {
+        "maturity": "2Y",
+        "date" : "2026-07-09",
+        "value": 4.13
+    }
+]
+payload = {"items": dates}
+response = requests.post("http://localhost:9000/api/maturities/batch/",json = payload)
+print(response.status_code, response)
 
-maturities = []
-matList = ["0Y1M", "0Y3M", "0Y6M", "1Y", "2Y", "3Y", "5Y", "7Y", "10Y", "20Y", "30Y"]
-
-dates = []
-j=0
-
-for index,rows in df.iterrows():
-    #Date for the current row
-    date = rows["Date"]
-    
-    #loop through columns after date
-    for i in range(len(matList)+1):
-        if (i ==0):
-            continue
-        mat = matList[i-1]
-
-        value = float(rows[mat])
-        maturity = str(mat)
-        date = str(date)
-
-        payload = {
-            "maturity": maturity,
-            "date": date,
-            "value":value
-        }
-        dates.append(payload)
-        j+=1
-
-    if (j>800):
-        payload = {"items": dates}
-        response = requests.post("http://localhost:9000/api/maturities/batch",json = payload)
-        print(response.status_code)
-        time.sleep(0.01)
-        j=0
-        dates = []
-
-if len(dates)>0:
-    payload = {"items": dates}
-    response = requests.post("http://localhost:9000/api/maturities/batch",json = payload)
-    print(response.status_code)
-    time.sleep(0.01)
-        
-    
-
-
-
+'''
