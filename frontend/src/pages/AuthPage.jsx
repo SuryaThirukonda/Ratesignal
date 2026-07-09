@@ -2,46 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
-function CurvePreview() {
-  return (
-    <div className="curve-preview" aria-hidden="true">
-      <div className="curve-preview-head">
-        <span>Curve sketch</span>
-        <span>Local UI</span>
-      </div>
-      <svg viewBox="0 0 520 220" className="curve-svg" role="presentation">
-        <defs>
-          <linearGradient id="curveStroke" x1="0" x2="1" y1="0" y2="0">
-            <stop offset="0%" stopColor="currentColor" stopOpacity="0.35" />
-            <stop offset="55%" stopColor="currentColor" stopOpacity="1" />
-            <stop offset="100%" stopColor="currentColor" stopOpacity="0.55" />
-          </linearGradient>
-        </defs>
-        <path
-          d="M28 168 C 96 150, 128 118, 178 100 S 286 82, 334 92 S 420 124, 492 58"
-          fill="none"
-          stroke="url(#curveStroke)"
-          strokeWidth="5"
-          strokeLinecap="round"
-        />
-        {[
-          [28, 168],
-          [132, 122],
-          [238, 94],
-          [340, 92],
-          [492, 58]
-        ].map(([x, y], index) => (
-          <circle key={index} cx={x} cy={y} r="8" fill="currentColor" />
-        ))}
-      </svg>
-      <div className="curve-preview-footer">
-        <span>Token check</span>
-        <span>/api/auth/me</span>
-      </div>
-    </div>
-  );
-}
-
 function AuthPanel() {
   const navigate = useNavigate();
   const { login, register } = useAuth();
@@ -74,7 +34,7 @@ function AuthPanel() {
 
     try {
       await login(loginForm);
-      navigate("/welcome", { replace: true });
+      navigate("/curve", { replace: true });
     } catch (authError) {
       setError(authError.message || "Unable to sign in.");
     } finally {
@@ -104,54 +64,24 @@ function AuthPanel() {
   }
 
   return (
-    <section className="auth-layout">
-      <article className="hero-panel">
-        <p className="eyebrow">Yield curve research desk</p>
-        <h1>Authenticate in a browser, then swap in your forecast views later.</h1>
-        <p className="lead">
-          This frontend keeps the first pass intentionally small: JWT storage,
-          session verification through <code>/api/auth/me</code>, and a clean
-          route for the post-login shell.
-        </p>
-
-        <div className="signal-row">
-          <span className="signal-pill">POST /api/auth/login</span>
-          <span className="signal-pill">POST /api/auth/register</span>
-          <span className="signal-pill">JWT in localStorage</span>
-        </div>
-
-        <CurvePreview />
-      </article>
-
+    <section className="auth-screen">
       <article className="auth-card">
-        <div className="card-head">
-          <div>
-            <p className="eyebrow">Session access</p>
-            <h2>{mode === "login" ? "Welcome back" : "Create an account"}</h2>
-          </div>
-
-          <div className="tab-group" role="tablist" aria-label="Auth mode">
-            <button
-              type="button"
-              className={`tab-button ${mode === "login" ? "active" : ""}`}
-              onClick={() => switchMode("login")}
-            >
-              Sign in
-            </button>
-            <button
-              type="button"
-              className={`tab-button ${mode === "register" ? "active" : ""}`}
-              onClick={() => switchMode("register")}
-            >
-              Register
-            </button>
-          </div>
+        <div className="tab-group" role="tablist" aria-label="Auth mode">
+          <button
+            type="button"
+            className={`tab-button ${mode === "login" ? "active" : ""}`}
+            onClick={() => switchMode("login")}
+          >
+            Sign in
+          </button>
+          <button
+            type="button"
+            className={`tab-button ${mode === "register" ? "active" : ""}`}
+            onClick={() => switchMode("register")}
+          >
+            Register
+          </button>
         </div>
-
-        <p className="card-intro">
-          The token is stored locally, then rechecked against your backend before
-          the dashboard opens.
-        </p>
 
         {notice ? <div className="notice-banner">{notice}</div> : null}
         {error ? <div className="error-banner">{error}</div> : null}
@@ -277,10 +207,6 @@ function AuthPanel() {
             </button>
           </form>
         )}
-
-        <p className="fineprint">
-          Local dev uses a Vite proxy, so `/api` reaches your backend on port 9000.
-        </p>
       </article>
     </section>
   );
@@ -288,7 +214,7 @@ function AuthPanel() {
 
 export function AuthPage() {
   return (
-    <div className="page-shell">
+    <div className="page-shell page-shell--auth">
       <AuthPanel />
     </div>
   );

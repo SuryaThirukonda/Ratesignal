@@ -1,13 +1,8 @@
 import express from "express";
-import cors from "cors";
-import {z} from "zod";
-import argon2 from "argon2";
-import jwt from "jsonwebtoken";
 import "dotenv/config";
-
-
 import PrismaPkg from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
+import { createMaturitySchema, getMaturitySchema } from "../schema.js";
 const { PrismaClient } = PrismaPkg;
 const adapter = new PrismaPg({
   connectionString: process.env.NEON_CONNECTION_STRING,
@@ -16,13 +11,103 @@ const prisma = new PrismaClient({ adapter });
 
 //everything above required for each router
 
+const isValidMaturity = function(maturity){
+    const matList = ["0Y1M", "0Y3M", "0Y6M", "1Y", "2Y", "3Y", "5Y", "7Y", "10Y", "20Y", "30Y"]
+    if (matList.includes(maturity)){
+        return true;
+    } 
+    return false;
+};
+
+const parseDate = (value) => {
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+};
+
 
 const router = express.Router();
 
 
 router.get("/", async (req,res,next)=> {
-    res.json({"message":"maturities_route"});
+    try{
+        const body = getMaturitySchema.parse(req.query);
+
+        const maturity = body.maturity;
+        const date = parseDate(body.date);
+
+        if (!isValidMaturity(maturity)){
+            return res.status(400).json({error: "Invalid Maturity"});
+        }
+
+        if (!date){
+            return res.status(400).json({error: "Invalid date"});
+        }
+
+        const mat = await prisma.yield.findUnique({
+            where: {
+                date_maturity: {
+                    date,
+                    maturity: maturity
+                },
+            },
+            select: {
+                maturity: true, 
+                date: true,
+                value: true
+            }
+        });
+
+        if (!mat){
+            return res.status(404).json({error: "mat not found"});
+        }
+
+        return res.status(200).json(mat);
+
+
+    }catch(err){
+        next(err);
+    }
 
 });
+
+router.post("/", async (req,res,next)=>{
+    try{
+        const body = createMaturitySchema.parse(req.body);
+
+        const maturity = body.maturity;
+        const date = parseDate(body.date);
+        const value = body.value;
+
+        if (!isValidMaturity(maturity)){
+            return res.status(400).json({error: "Invalid Maturity"});
+        }
+
+        if (!date){
+            return res.status(400).json({error: "Invalid date"});
+        }
+
+        const mat = await prisma.yield.create({
+            data: {
+                maturity: maturity,
+                value: value, 
+                date: date
+            },
+            select : {
+                maturity: true, 
+                date: true,
+                value: true
+            }
+        });
+
+        return res.status(201).json(mat);
+
+
+
+    }catch(err){
+        next(err);
+    }
+
+});
+
 
 export default router;

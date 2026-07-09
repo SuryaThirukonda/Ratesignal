@@ -15,4 +15,17 @@ export const createUserSchema = z.object({
 export const loginUserSchema = z.object({
     identifier : z.string().min(1, "Email or password is required"),
     password: z.string().min(8, "password is required")
-})
+});
+
+export const getMaturitySchema = z.object({
+  maturity: z.string().min(2, "Enter a valid maturity").max(4, "Enter a valid maturity"),
+  date: z.string().min(5).max(15)
+
+});
+
+export const createMaturitySchema = z.object({
+  maturity: z.string().min(2, "Enter a valid maturity").max(4, "Enter a valid maturity"),
+  date: z.string().min(5).max(15),
+  value: z.float32()
+
+});

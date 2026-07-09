@@ -2,20 +2,13 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { TopBar } from "./components/TopBar";
 import { useAuth } from "./context/AuthContext";
 import { AuthPage } from "./pages/AuthPage";
-import { WelcomePage } from "./pages/WelcomePage";
+import { DashboardPage } from "./pages/DashboardPage";
 
 function BootScreen() {
   return (
     <section className="boot-screen" aria-live="polite">
       <div className="boot-card">
-        <div className="boot-loader" aria-hidden="true">
-          <span />
-          <span />
-          <span />
-        </div>
-        <p className="eyebrow">Loading session</p>
-        <h1>Checking for an existing JWT...</h1>
-        <p>We are validating the token against <code>/api/auth/me</code>.</p>
+        <p className="boot-copy">Loading session...</p>
       </div>
     </section>
   );
@@ -30,13 +23,13 @@ function AppRoutes() {
 
   return (
     <Routes>
-      <Route path="/" element={isAuthenticated ? <Navigate to="/welcome" replace /> : <AuthPage />} />
-      <Route path="/auth" element={isAuthenticated ? <Navigate to="/welcome" replace /> : <AuthPage />} />
+      <Route path="/" element={isAuthenticated ? <Navigate to="/curve" replace /> : <AuthPage />} />
+      <Route path="/auth" element={isAuthenticated ? <Navigate to="/curve" replace /> : <AuthPage />} />
       <Route
-        path="/welcome"
-        element={isAuthenticated ? <WelcomePage /> : <Navigate to="/" replace />}
+        path="/curve"
+        element={isAuthenticated ? <DashboardPage /> : <Navigate to="/" replace />}
       />
-      <Route path="*" element={<Navigate to={isAuthenticated ? "/welcome" : "/"} replace />} />
+      <Route path="*" element={<Navigate to={isAuthenticated ? "/curve" : "/"} replace />} />
     </Routes>
   );
 }
