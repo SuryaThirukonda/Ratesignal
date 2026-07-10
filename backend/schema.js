@@ -19,7 +19,7 @@ export const loginUserSchema = z.object({
 
 //probs not needed
 export const getMaturitySchema = z.object({
-  maturity: z.array(string()).min(1, "Enter a maturity").max(11, "Entered too many maturities"),
+  maturity: z.preprocess(value => Array.isArray(value) ? value: [value], z.array(z.string()).min(1).max(11)),
   dateMin: z.string().min(5).max(15),
   dateMax: z.string().min(5).max(15),
   sortByDate: z.string().min(3).max(4).default("asc")

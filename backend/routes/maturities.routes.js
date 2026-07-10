@@ -3,7 +3,6 @@ import "dotenv/config";
 import PrismaPkg from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { createMaturitySchema, getMaturitySchema,createMaturitySchemaBatch } from "../schema.js";
-import { _isoDateTime } from "zod/v4/core";
 const { PrismaClient } = PrismaPkg;
 const adapter = new PrismaPg({
   connectionString: process.env.NEON_CONNECTION_STRING,
@@ -14,7 +13,12 @@ const prisma = new PrismaClient({ adapter });
 
 const isValidMaturity = function(maturity){
     const matList = ["0Y1M", "0Y3M", "0Y6M", "1Y", "2Y", "3Y", "5Y", "7Y", "10Y", "20Y", "30Y"]
-
+    if (typeof maturity == "string"){
+        if (matList.includes(maturity)){
+            return true;
+        }
+        return false;
+    }
     for (const mat of maturity){
         if (!matList.includes(mat)){
             return false;
@@ -53,15 +57,10 @@ router.get("/", async (req,res,next)=> {
         }
 
         //check date validity
-        if (!dateMin && !dateMax){
+        if (!dateMin || !dateMax){
             return res.status(400).json({error: "Invalid date"});
         }
-        if (dateMin && !dateMax){
-            dateMax = dateMin;
-        }
-        if(dateMax && !dateMin){
-            dateMin = dateMax;
-        }
+   
 
         //check order validity
         if (order != "asc" && order != "desc"){

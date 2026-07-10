@@ -15,23 +15,36 @@ export const MATURITIES = [
 ];
 
 export async function fetchYieldCurve(date) {
-  const points = await Promise.all(
-    MATURITIES.map(async (maturity) => {
-      const params = new URLSearchParams({
-        date,
-        maturity: maturity.key
-      });
+  const params = new URLSearchParams({
+    dateMin: date,
+    dateMax: date,
+    sortByDate: "asc"
+  });
 
-      const point = await apiRequest(`/api/maturities?${params.toString()}`);
+  MATURITIES.forEach((maturity) => {
+    params.append("maturity", maturity.key);
+  });
 
-      return {
-        maturity: maturity.key,
-        label: maturity.label,
-        value: Number(point.value),
-        date: point.date
-      };
-    })
-  );
+  const records = await apiRequest(`/api/maturities?${params.toString()}`);
 
-  return points;
+  if (!Array.isArray(records)) {
+    throw new Error("The maturities response was not an array.");
+  }
+
+  const recordByMaturity = new Map(records.map((record) => [record.maturity, record]));
+
+  return MATURITIES.flatMap((maturity) => {
+    const record = recordByMaturity.get(maturity.key);
+
+    if (!record) {
+      return [];
+    }
+
+    return [{
+      maturity: maturity.key,
+      label: maturity.label,
+      value: Number(record.value),
+      date: record.date
+    }];
+  });
 }
