@@ -19,16 +19,18 @@ export const loginUserSchema = z.object({
 
 //probs not needed
 export const getMaturitySchema = z.object({
-  maturity: z.string().min(2, "Enter a valid maturity").max(4, "Enter a valid maturity"),
-  date: z.string().min(5).max(15)
+  maturity: z.array(string()).min(1, "Enter a maturity").max(11, "Entered too many maturities"),
+  dateMin: z.string().min(5).max(15),
+  dateMax: z.string().min(5).max(15),
+  sortByDate: z.string().min(3).max(4).default("asc")
+
 
 });
 
 export const createMaturitySchema = z.object({
   maturity: z.string().min(2, "Enter a valid maturity").max(4, "Enter a valid maturity"),
   date: z.string().min(5).max(15),
-  value: z.float32()
-
+  value: z.float32(),
 });
 
 //batch upload schema

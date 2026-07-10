@@ -14,10 +14,14 @@ const prisma = new PrismaClient({ adapter });
 
 const isValidMaturity = function(maturity){
     const matList = ["0Y1M", "0Y3M", "0Y6M", "1Y", "2Y", "3Y", "5Y", "7Y", "10Y", "20Y", "30Y"]
-    if (matList.includes(maturity)){
-        return true;
-    } 
-    return false;
+
+    for (const mat of maturity){
+        if (!matList.includes(mat)){
+            return false;
+        }
+    }
+    
+    return true;
 };
 
 const parseDate = (value) => {
@@ -34,32 +38,58 @@ router.get("/", async (req,res,next)=> {
     try{
         const body = getMaturitySchema.parse(req.query);
 
-        const maturity = body.maturity;
-        const date = parseDate(body.date);
+        let maturity = body.maturity;
+        if (typeof maturity == "string"){
+            maturity =[maturity];
+        }
 
+        let dateMin = parseDate(body.dateMin);
+        let dateMax = parseDate(body.dateMax);
+        const order = body.sortByDate;
+
+        //check maturity validity
         if (!isValidMaturity(maturity)){
             return res.status(400).json({error: "Invalid Maturity"});
         }
 
-        if (!date){
+        //check date validity
+        if (!dateMin && !dateMax){
             return res.status(400).json({error: "Invalid date"});
         }
+        if (dateMin && !dateMax){
+            dateMax = dateMin;
+        }
+        if(dateMax && !dateMin){
+            dateMin = dateMax;
+        }
 
-        const mat = await prisma.yield.findUnique({
+        //check order validity
+        if (order != "asc" && order != "desc"){
+            return res.status(400).json({error: "Invalid sort"})
+        }
+
+        const mat = await prisma.yield.findMany({
             where: {
-                date_maturity: {
-                    date,
-                    maturity: maturity
+                date: {
+                    gte: dateMin,
+                    lte: dateMax
                 },
+                maturity: {
+                    in : maturity
+                }
             },
             select: {
                 maturity: true, 
                 date: true,
                 value: true
+            },
+            orderBy: {
+                date: order
             }
         });
+        
 
-        if (!mat){
+        if (mat.length ==0 ){
             return res.status(404).json({error: "mat not found"});
         }
 
