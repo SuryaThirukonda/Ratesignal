@@ -39,25 +39,39 @@ const modelTypeSchema = z.enum([
   "varDns"
 ]);
 
-const horizonSchema = z.enum([
-  "1",
-  "5",
-  "20"
-]);
+//express query comes as string, validate as string, typecast to number
+const horizonSchema = z.preprocess(
+  value => typeof value =="string" ? value: String(value),
+  z.enum(["1","5","20"])
+).transform(value => Number(value));
+
+const sortSchema = z.enum(["asc", "desc"]);
+
+// Validate dates ()
+const dateMinMat = "2001-07-31";
+const dateMaxMat = "2025-05-14";
+const dateSchema = z.iso.date().refine(date=> date<=dateMaxMat && date>=dateMinMat).transform(value=> new Date(value));
 
 export const getMaturitySchema = z.object({
-  maturity: z.preprocess(value => Array.isArray(value) ? value: [value], z.array(z.string()).min(1).max(11)),
-  dateMin: z.string().min(5).max(15),
-  dateMax: z.string().min(5).max(15),
-  sortByDate: z.string().min(3).max(4).default("asc")
-
-
-});
+  maturity: z.preprocess(
+    value => Array.isArray(value) ? value: [value],
+    z.array(maturitySchema).min(1),
+  ),
+  dateMin: dateSchema,
+  dateMax: dateSchema,
+  sortByDate: sortSchema.default("asc")
+}).refine(
+  ({dateMin, dateMax}) => dateMin <= dateMax,
+  {
+    message: "datemin must be less than datemax",
+    path: ["dateMax"],
+  }
+);
 
 export const createMaturitySchema = z.object({
-  maturity: z.string().min(2, "Enter a valid maturity").max(4, "Enter a valid maturity"),
-  date: z.string().min(5).max(15),
-  value: z.float32(),
+  maturity: maturitySchema,
+  date: dateSchema,
+  value: z.float32().min(0).max(20)  ,
 });
 
 //batch upload schema
@@ -68,25 +82,45 @@ export const createMaturitySchemaBatch = z.object({
 
 //predictions schemas
 
-export const getPredictionSchema = z.object({
-  maturity: z.preprocess(value => Array.isArray(value) ? value: [value], z.array(z.string()).min(1).max(11)),
-  asOfDate: z.string().min(5).max(15),
-  predictedDateMin: z.string().min(5).max(15),
-  predictedDateMax: z.string().min(5).max(15),
-  sortByDate: z.string().min(3).max(4).default("asc"),
-  modelType: z.preprocess(value => Array.isArray(value) ? value: [value], z.array(z.string()).min(1).max(13)),
-  horizon: z.preprocess(value => Array.isArray(value)? value: [value], z.array(z.int()))
+const dateMaxPred = "2025-06-03";
+const dateSchemaPred = z.iso.date().refine(date=> date<=dateMaxPred && date>=dateMinMat).transform(value => new Date(value));
 
-});
+export const getPredictionSchema = z.object({
+  maturity: z.preprocess(
+    value => Array.isArray(value) ? value: [value],
+    z.array(maturitySchema).min(1)
+  ),
+  asOfDate: dateSchema,
+  predictedDateMin: dateSchemaPred,
+  predictedDateMax: dateSchemaPred,
+  sortByDate: sortSchema,
+  modelType: z.preprocess(
+    value => Array.isArray(value) ? value: [value],
+    z.array(modelTypeSchema).min(1).max(13)
+  ),
+  horizon: z.preprocess(value => Array.isArray(value)? value: [value], z.array(horizonSchema).min(1))
+
+}).refine(
+  ({predictedDateMin,predictedDateMax,asOfDate}) => predictedDateMin<=predictedDateMax && asOfDate< predictedDateMin,
+  {
+    message: "predicted dates must be higher than asOfDate",
+    path: ["dateMax"],
+  }
+);
 
 export const createPredictionSchema = z.object({
-  maturity: z.string().min(2, "Enter a valid maturity").max(4, "Enter a valid maturity"),
-  asOfDate: z.string().min(5).max(15),
-  predictedDate: z.string().min(5).max(15),
-  value: z.float32(),
-  modelType: z.string().min(2).max(20),
-  horizon: z.int()
-});
+  maturity: maturitySchema,
+  asOfDate: dateSchema,
+  predictedDate: dateSchemaPred,
+  value: z.float32().min(0).max(20),
+  modelType: modelTypeSchema,
+  horizon: horizonSchema
+}).refine(
+  ({asOfDate, predictedDate}) => asOfDate<predictedDate,
+  {
+    message: "As of date is less than predictedDate"
+  }
+);
 
 export const createPredictionSchemaBatch = z.object({
   items: z.array(createPredictionSchema).min(1).max(1000)
