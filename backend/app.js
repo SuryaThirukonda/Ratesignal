@@ -25,7 +25,11 @@ const port = process.env.PORT || 8000;
 
 const app = express();
 
-app.use(cors());
+
+//change for deployment
+app.use(cors({
+    origin: "http://localhost:3000"
+}));
 app.use(express.json());
 
 //routes

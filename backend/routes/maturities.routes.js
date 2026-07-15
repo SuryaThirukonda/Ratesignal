@@ -125,7 +125,7 @@ router.post("/batch/", async (req,res,next)=>{
         return res.status(201).json({
             inserted: maturities.count,
             recieved: rows.length
-        })
+        });
     }catch(err){
         next(err);
     }
