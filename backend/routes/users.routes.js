@@ -5,20 +5,13 @@ import argon2 from "argon2";
 import jwt from "jsonwebtoken";
 import "dotenv/config";
 
-
-import PrismaPkg from "@prisma/client";
-import { PrismaPg } from "@prisma/adapter-pg";
-const { PrismaClient } = PrismaPkg;
-const adapter = new PrismaPg({
-  connectionString: process.env.NEON_CONNECTION_STRING,
-});
-const prisma = new PrismaClient({ adapter });
-
-//everything above required for each router
+import {prisma} from "../db.js";
 
 import { createUserSchema,loginUserSchema } from ".././schema.js"
 
 const router = express.Router();
+
+import { requireAuth } from "../middleware.js";
 
 
 
@@ -116,47 +109,10 @@ router.post("/login", async (req,res,next) => {
 
 
 //auth verify a jwt
-router.post("/me", async (req,res,next) => {
-    try{
-        const authHeader = req.headers.authorization;
+router.post("/me",requireAuth, async (req,res) => {
 
-        if (!authHeader || !authHeader.startsWith("Bearer ")){
-            return res.status(401).json({error: "Unauthorized"});
-        }
-
-        const token = authHeader.split(" ")[1];
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-        if (!decoded || !decoded.userId){
-            return res.status(401).json({error: "unauthenticated"});
-        } 
-
-        const user = await prisma.user.findUnique({
-            where: {
-                id: decoded.userId
-            }
-        });
-
-        if (!user){
-            return res.status(401).json({error: "Unauthorized"});
-        }
-
-        res.json({
-            "user" :{
-                "id": user.id,
-                "name": user.name,
-                "username": user.username,
-            }
-        });
-
-        return res.status(200).json({message: "User authenticated", user: user});
-
-
-    }catch(err){
-        next(err);
-    }
-
-
+    //jwt check logic already exists in requireAuth middleware function
+    return res.status(200).json({user: req.user});
 });
 
 export default router;

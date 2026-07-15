@@ -1,13 +1,6 @@
 import express from "express";
-import "dotenv/config";
-import PrismaPkg from "@prisma/client";
-import { PrismaPg } from "@prisma/adapter-pg";
 import { createMaturitySchema, getMaturitySchema,createMaturitySchemaBatch } from "../schema.js";
-const { PrismaClient } = PrismaPkg;
-const adapter = new PrismaPg({
-  connectionString: process.env.NEON_CONNECTION_STRING,
-});
-const prisma = new PrismaClient({ adapter });
+import {prisma} from "../db.js";
 
 const router = express.Router();
 

@@ -1,17 +1,8 @@
 import express from "express";
-import "dotenv/config";
-import PrismaPkg from "@prisma/client";
-import { PrismaPg } from "@prisma/adapter-pg";
+import {prisma} from "../db.js";
 import { createPredictionSchema, getPredictionSchema, createPredictionSchemaBatch } from "../schema.js";
-const { PrismaClient } = PrismaPkg;
-const adapter = new PrismaPg({
-  connectionString: process.env.NEON_CONNECTION_STRING,
-});
-const prisma = new PrismaClient({ adapter });
 
 const router = express.Router();
-
-
 
 router.get("/", async (req,res,next)=> {
     try{
