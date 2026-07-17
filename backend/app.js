@@ -10,7 +10,9 @@ import {prisma} from "./db.js"
 //swagger
 import swaggerUI from 'swagger-ui-express';
 import swaggerJsdoc from 'swagger-jsdoc';
-import { openApiDocument } from "./openapi/document.js";
+
+//dont use zod-to-openapi, openapi descriptions are wrote manually
+//import { openApiDocument } from "./openapi/document.js";
 
 //routes
 import userRouter from "./routes/users.routes.js";
@@ -21,7 +23,7 @@ import predictionRouter from "./routes/predictions.routes.js";
 import {requireAuth,authlimit,dataLimit} from "./middleware.js";
 
 
-const port = process.env.PORT || 8000;
+const port = process.env.PORT || 9000;
 const app = express();
 
 if (!process.env.NEON_CONNECTION_STRING || !process.env.JWT_SECRET){
@@ -30,7 +32,7 @@ if (!process.env.NEON_CONNECTION_STRING || !process.env.JWT_SECRET){
 
 //change for deployment
 app.use(cors({
-    origin: "http://localhost:3000"
+    origin: "http://localhost:5173"
 }));
 app.use(express.json());
 
@@ -74,6 +76,6 @@ app.use((err,req,res,next) => {
 
 });
 
-app.listen(port, () => 
+app.listen(port, () =>
     console.log(`Server is running on port ${port}`)
 );

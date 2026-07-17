@@ -4,17 +4,51 @@ import {prisma} from "../db.js";
 
 const router = express.Router();
 
-
 /**
  * @swagger
- * /api/:
- *   get:
- *     summary: root
- *     responses:
- *       200:
- *         description: Yield records returned
- *       401:
- *         description: Authentication required
+ * /api/maturities:
+ *  get:
+ *    security:
+ *      - bearerAuth : []
+ *    summary: root
+ *    parameters: 
+ *      - in query:
+ *        name: maturity
+ *        required: true
+ *        schema: 
+ *          type: string
+ *          enum: [0Y1M, 0Y3M, 0Y6M, 1Y, 2Y, 3Y, 5Y, 7Y, 10Y, 20Y, 30Y]
+ *        example: 1Y
+ *      - in query:
+ *        name: dateMin
+ *        required: true
+ *        schema:
+ *          type: string
+ *          format: date
+ *        example: 2025-01-01
+ *      - in query:
+ *        name: dateMax
+ *        required: true
+ *        schema:
+ *          type: string
+ *          format: date
+ *        example: 2025-02-01
+ *      - in query: 
+ *        name: sortByDate
+ *        required: false
+ *        schema:
+ *          type: string
+ *          enum: [asc,desc]
+ *          default: asc
+ *    responses:
+ *      200:
+ *        description: Yield records returned
+ *      401:
+ *        description: Authentication required
+ *      404: 
+ *        description: Nothing found
+ * 
+ * 
  */
 router.get("/", async (req,res,next)=> {
     try{
@@ -59,6 +93,23 @@ router.get("/", async (req,res,next)=> {
 
 });
 
+/**
+ * @swagger
+ * /api/maturities/batch:
+ *  post:
+ *    security:
+ *      - bearerAuth: []
+ *    summary: post maturities in batches
+ *    parameters:
+ *      - in body:
+ *        name: maturity
+ *        required: true
+ *        schema: 
+ *          type: string
+ *          enum: [0Y1M, 0Y3M, 0Y6M, 1Y, 2Y, 3Y, 5Y, 7Y, 10Y, 20Y, 30Y]
+ *        example: 1Y
+ *      - in body: 
+ */
 router.post("/batch/", async (req,res,next)=>{
     try{
         

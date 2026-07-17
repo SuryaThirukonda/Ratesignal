@@ -1,0 +1,13 @@
+{
+  "name": "ratesignal-application",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "docker:up": "docker-compose up --build -d",
+    "docker:down": "docker-compose down"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module"
+}
