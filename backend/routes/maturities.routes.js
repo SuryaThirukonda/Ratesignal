@@ -5,7 +5,17 @@ import {prisma} from "../db.js";
 const router = express.Router();
 
 
-
+/**
+ * @swagger
+ * /api/:
+ *   get:
+ *     summary: root
+ *     responses:
+ *       200:
+ *         description: Yield records returned
+ *       401:
+ *         description: Authentication required
+ */
 router.get("/", async (req,res,next)=> {
     try{
         const body = getMaturitySchema.parse(req.query);

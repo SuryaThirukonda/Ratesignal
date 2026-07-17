@@ -3,6 +3,8 @@ import { TopBar } from "./components/TopBar";
 import { useAuth } from "./context/AuthContext";
 import { AuthPage } from "./pages/AuthPage";
 import { DashboardPage } from "./pages/DashboardPage";
+import { MaturityHistoryPage } from "./pages/MaturityHistoryPage";
+import { PredictionsPage } from "./pages/PredictionsPage";
 
 function BootScreen() {
   return (
@@ -28,6 +30,14 @@ function AppRoutes() {
       <Route
         path="/curve"
         element={isAuthenticated ? <DashboardPage /> : <Navigate to="/" replace />}
+      />
+      <Route
+        path="/history"
+        element={isAuthenticated ? <MaturityHistoryPage /> : <Navigate to="/" replace />}
+      />
+      <Route
+        path="/predictions"
+        element={isAuthenticated ? <PredictionsPage /> : <Navigate to="/" replace />}
       />
       <Route path="*" element={<Navigate to={isAuthenticated ? "/curve" : "/"} replace />} />
     </Routes>

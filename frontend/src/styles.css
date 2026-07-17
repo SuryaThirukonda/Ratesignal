@@ -53,7 +53,8 @@ body {
 }
 
 button,
-input {
+input,
+select {
   font: inherit;
 }
 
@@ -111,6 +112,13 @@ code {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-wrap: wrap;
+}
+
+.shell-nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   flex-wrap: wrap;
 }
 
@@ -221,6 +229,16 @@ input:focus-visible {
 }
 
 .field input {
+  width: 100%;
+  min-height: 42px;
+  padding: 10px 12px;
+  color: var(--text);
+  border-radius: 2px;
+  border: 1px solid var(--border);
+  background: var(--panel-strong);
+}
+
+.field select {
   width: 100%;
   min-height: 42px;
   padding: 10px 12px;
@@ -348,6 +366,17 @@ input:focus-visible {
   align-items: end;
   gap: 10px;
   flex-wrap: wrap;
+}
+
+.filter-form {
+  display: grid;
+  grid-template-columns: minmax(130px, 1fr) minmax(170px, 1fr) minmax(170px, 1fr) auto;
+  gap: 10px;
+  align-items: end;
+}
+
+.filter-form--prediction {
+  grid-template-columns: repeat(3, minmax(130px, 1fr)) repeat(3, minmax(155px, 1fr)) auto;
 }
 
 .date-picker {
@@ -639,6 +668,11 @@ input:focus-visible {
   .stat-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .filter-form,
+  .filter-form--prediction {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 720px) {
@@ -649,6 +683,10 @@ input:focus-visible {
 
   .shell-actions {
     justify-content: space-between;
+  }
+
+  .shell-nav {
+    width: 100%;
   }
 
   .page-shell--auth {
@@ -664,7 +702,9 @@ input:focus-visible {
   }
 
   .field-grid,
-  .stat-grid {
+  .stat-grid,
+  .filter-form,
+  .filter-form--prediction {
     grid-template-columns: 1fr;
   }
 

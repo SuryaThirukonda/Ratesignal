@@ -14,6 +14,8 @@ export async function query(text, params = []){
 }
 */
 
+import "dotenv/config";
+
 import PrismaPkg from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 const { PrismaClient } = PrismaPkg;

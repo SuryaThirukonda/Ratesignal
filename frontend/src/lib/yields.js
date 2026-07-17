@@ -48,3 +48,69 @@ export async function fetchYieldCurve(date) {
     }];
   });
 }
+
+export async function fetchMaturityHistory({ maturity, dateMin, dateMax, token }) {
+  const params = new URLSearchParams({
+    maturity,
+    dateMin,
+    dateMax,
+    sortByDate: "asc"
+  });
+
+  const records = await apiRequest(`/api/maturities?${params.toString()}`, { token });
+
+  if (!Array.isArray(records)) {
+    throw new Error("The maturity history response was not an array.");
+  }
+
+  return records.map((record) => ({
+    date: record.date,
+    value: Number(record.value),
+    maturity: record.maturity
+  }));
+}
+
+export const PREDICTION_MODELS = [
+  { key: "ar", label: "AR" },
+  { key: "var", label: "VAR" },
+  { key: "arXgboost", label: "AR + XGBoost" },
+  { key: "varXgboostMat", label: "VAR + XGBoost (maturity)" },
+  { key: "varXgboostDns", label: "VAR + XGBoost (DNS)" },
+  { key: "arDns", label: "AR + DNS" },
+  { key: "varDns", label: "VAR + DNS" }
+];
+
+export async function fetchPredictions({
+  maturity,
+  asOfDate,
+  predictedDateMin,
+  predictedDateMax,
+  modelType,
+  horizon,
+  token
+}) {
+  const params = new URLSearchParams({
+    maturity,
+    asOfDate,
+    predictedDateMin,
+    predictedDateMax,
+    sortByDate: "asc",
+    modelType,
+    horizon: String(horizon)
+  });
+
+  const records = await apiRequest(`/api/predictions?${params.toString()}`, { token });
+
+  if (!Array.isArray(records)) {
+    throw new Error("The predictions response was not an array.");
+  }
+
+  return records.map((record) => ({
+    date: record.predictedDate,
+    value: Number(record.value),
+    maturity: record.maturity,
+    asOfDate: record.asOfDate,
+    modelType: record.modelType,
+    horizon: record.horizon
+  }));
+}

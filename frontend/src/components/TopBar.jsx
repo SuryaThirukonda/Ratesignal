@@ -16,6 +16,13 @@ export function TopBar() {
       <strong className="shell-brand">Ratesignal</strong>
 
       <div className="shell-actions">
+        {isAuthenticated ? (
+          <nav className="shell-nav" aria-label="Primary navigation">
+            <button type="button" className="ghost-button" onClick={() => navigate("/curve")}>Curve</button>
+            <button type="button" className="ghost-button" onClick={() => navigate("/history")}>History</button>
+            <button type="button" className="ghost-button" onClick={() => navigate("/predictions")}>Predictions</button>
+          </nav>
+        ) : null}
         <button type="button" className="ghost-button" onClick={toggleTheme}>
           {theme === "dark" ? "Light" : "Dark"}
         </button>

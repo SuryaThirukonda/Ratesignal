@@ -1,6 +1,6 @@
 import {z} from "zod";
 
-
+import {registry} from "./openapi/registry.js";
 // User Schemas
 export const createUserSchema = z.object({
   name: z.string().min(0),
