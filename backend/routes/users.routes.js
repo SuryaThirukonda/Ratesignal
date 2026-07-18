@@ -17,6 +17,29 @@ import { requireAuth } from "../middleware.js";
 
 
 //auth register
+/**
+ * @swagger
+ * /api/auth/register:
+ *   post:
+ *     tags: [Authentication]
+ *     summary: Register a user
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [name, username, email, password]
+ *             properties:
+ *               name: { type: string, example: Alex Morgan }
+ *               username: { type: string, example: alex_morgan }
+ *               email: { type: string, format: email, example: alex@example.com }
+ *               password: { type: string, format: password, example: password123 }
+ *     responses:
+ *       201: { description: User created }
+ *       400: { description: Invalid registration input }
+ *       500: { description: Internal server error }
+ */
 router.post("/register", async (req,res,next) => {
     //user table -> id,name, email, hashed_password, created_at, updated_at, email_verified
 
@@ -50,6 +73,29 @@ router.post("/register", async (req,res,next) => {
 });
 
 //auth login, give a jwt
+/**
+ * @swagger
+ * /api/auth/login:
+ *   post:
+ *     tags: [Authentication]
+ *     summary: Sign in and receive a JWT
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [identifier, password]
+ *             properties:
+ *               identifier: { type: string, example: alex_morgan }
+ *               password: { type: string, format: password, example: password123 }
+ *     responses:
+ *       200: { description: Authenticated user and JWT returned }
+ *       400: { description: Invalid login input }
+ *       401: { description: Invalid username/email or password }
+ *       429: { description: Too many authentication requests }
+ *       500: { description: Internal server error }
+ */
 router.post("/login", async (req,res,next) => {
     try{
         const body = loginUserSchema.parse(req.body);
@@ -109,6 +155,20 @@ router.post("/login", async (req,res,next) => {
 
 
 //auth verify a jwt
+/**
+ * @swagger
+ * /api/auth/me:
+ *   post:
+ *     tags: [Authentication]
+ *     summary: Verify the current JWT
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200: { description: Authenticated user returned }
+ *       401: { description: Missing, invalid, or expired JWT }
+ *       429: { description: Too many authentication requests }
+ *       500: { description: Internal server error }
+ */
 router.post("/me",requireAuth, async (req,res) => {
 
     //jwt check logic already exists in requireAuth middleware function

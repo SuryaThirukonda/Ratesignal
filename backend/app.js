@@ -46,7 +46,16 @@ app.use("/api/predictions", dataLimit, requireAuth,predictionRouter);
 const swaggerSettings = {
     definition: {
         openapi: '3.0.0',
-        info: { title: "Ratesignal express API", version: '1.0.0'}
+        info: { title: "Ratesignal express API", version: '1.0.0'},
+        components: {
+            securitySchemes: {
+                bearerAuth: {
+                    type: "http",
+                    scheme: "bearer",
+                    bearerFormat: "JWT"
+                }
+            }
+        }
     },
     apis: ['./routes/*.routes.js'],
 };

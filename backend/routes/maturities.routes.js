@@ -8,6 +8,7 @@ const router = express.Router();
  * @swagger
  * /api/maturities:
  *  get:
+ *    tags: [Maturities]
  *    security:
  *      - bearerAuth : []
  *    summary: root
@@ -97,18 +98,32 @@ router.get("/", async (req,res,next)=> {
  * @swagger
  * /api/maturities/batch:
  *  post:
+ *    tags: [Maturities]
  *    security:
  *      - bearerAuth: []
  *    summary: post maturities in batches
- *    parameters:
- *      - in body:
- *        name: maturity
- *        required: true
- *        schema: 
- *          type: string
- *          enum: [0Y1M, 0Y3M, 0Y6M, 1Y, 2Y, 3Y, 5Y, 7Y, 10Y, 20Y, 30Y]
- *        example: 1Y
- *      - in body: 
+ *    requestBody:
+ *      required: true
+ *      content:
+ *        application/json:
+ *          schema:
+ *            type: object
+ *            required: [items]
+ *            properties:
+ *              items:
+ *                type: array
+ *                items:
+ *                  type: object
+ *                  required: [maturity, date, value]
+ *                  properties:
+ *                    maturity: { type: string, enum: [0Y1M, 0Y3M, 0Y6M, 1Y, 2Y, 3Y, 5Y, 7Y, 10Y, 20Y, 30Y] }
+ *                    date: { type: string, format: date }
+ *                    value: { type: number }
+ *    responses:
+ *      201: { description: Batch insert result }
+ *      400: { description: Invalid input }
+ *      401: { description: Authentication required }
+ *      500: { description: Internal server error }
  */
 router.post("/batch/", async (req,res,next)=>{
     try{
@@ -137,6 +152,31 @@ router.post("/batch/", async (req,res,next)=>{
 
 });
 
+/**
+ * @swagger
+ * /api/maturities:
+ *   post:
+ *     tags: [Maturities]
+ *     summary: Create one maturity yield record
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [maturity, date, value]
+ *             properties:
+ *               maturity: { type: string, enum: [0Y1M, 0Y3M, 0Y6M, 1Y, 2Y, 3Y, 5Y, 7Y, 10Y, 20Y, 30Y] }
+ *               date: { type: string, format: date }
+ *               value: { type: number }
+ *     responses:
+ *       201: { description: Maturity record created }
+ *       400: { description: Invalid input }
+ *       401: { description: Authentication required }
+ *       500: { description: Internal server error }
+ */
 router.post("/", async (req,res,next)=>{
     try{
         const body = createMaturitySchema.parse(req.body);
