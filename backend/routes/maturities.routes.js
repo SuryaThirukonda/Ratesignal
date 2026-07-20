@@ -1,6 +1,7 @@
 import express from "express";
 import { createMaturitySchema, getMaturitySchema,createMaturitySchemaBatch } from "../schema.js";
 import {prisma} from "../db.js";
+import {requireAuth, requireSeedToken} from "../middleware.js";
 
 const router = express.Router();
 
@@ -51,7 +52,7 @@ const router = express.Router();
  * 
  * 
  */
-router.get("/", async (req,res,next)=> {
+router.get("/", requireAuth, async (req,res,next)=> {
     try{
         const body = getMaturitySchema.parse(req.query);
 
@@ -125,7 +126,7 @@ router.get("/", async (req,res,next)=> {
  *      401: { description: Authentication required }
  *      500: { description: Internal server error }
  */
-router.post("/batch/", async (req,res,next)=>{
+router.post("/batch/", requireSeedToken, async (req,res,next)=>{
     try{
         
         const result = createMaturitySchemaBatch.safeParse(req.body);
@@ -177,7 +178,7 @@ router.post("/batch/", async (req,res,next)=>{
  *       401: { description: Authentication required }
  *       500: { description: Internal server error }
  */
-router.post("/", async (req,res,next)=>{
+router.post("/", requireSeedToken, async (req,res,next)=>{
     try{
         const body = createMaturitySchema.parse(req.body);
 

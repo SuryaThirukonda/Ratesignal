@@ -36,7 +36,8 @@ const modelTypeSchema = z.enum([
   "varXgboostMat",
   "varXgboostDns",
   "arDns",
-  "varDns"
+  "varDns",
+  "randomWalk"
 ]);
 
 //express query comes as string, validate as string, typecast to number

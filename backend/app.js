@@ -20,7 +20,7 @@ import maturityRouter from "./routes/maturities.routes.js";
 import predictionRouter from "./routes/predictions.routes.js";
 
 //middleware
-import {requireAuth,authlimit,dataLimit} from "./middleware.js";
+import {authlimit,dataLimit} from "./middleware.js";
 
 
 const port = process.env.PORT || 9000;
@@ -38,8 +38,8 @@ app.use(express.json());
 
 //routes
 app.use("/api/auth", authlimit, userRouter);
-app.use("/api/maturities", dataLimit, requireAuth, maturityRouter);
-app.use("/api/predictions", dataLimit, requireAuth,predictionRouter);
+app.use("/api/maturities", dataLimit, maturityRouter);
+app.use("/api/predictions", dataLimit,predictionRouter);
 
 //swagger
 

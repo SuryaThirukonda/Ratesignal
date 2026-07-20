@@ -1,6 +1,7 @@
 import express from "express";
 import {prisma} from "../db.js";
 import { createPredictionSchema, getPredictionSchema, createPredictionSchemaBatch } from "../schema.js";
+import {requireAuth, requireSeedToken} from "../middleware.js";
 
 const router = express.Router();
 
@@ -27,7 +28,7 @@ const router = express.Router();
  *       404: { description: No matching predictions found }
  *       500: { description: Internal server error }
  */
-router.get("/", async (req,res,next)=> {
+router.get("/", requireAuth, async (req,res,next)=> {
     try{
         const body = getPredictionSchema.parse(req.query);
 
@@ -116,7 +117,7 @@ router.get("/", async (req,res,next)=> {
  *       401: { description: Authentication required }
  *       500: { description: Internal server error }
  */
-router.post("/batch/", async (req,res,next)=>{
+router.post("/batch/", requireSeedToken,async (req,res,next)=>{
     try{
         const result = createPredictionSchemaBatch.safeParse(req.body);
         if (!result.success){
@@ -169,7 +170,7 @@ router.post("/batch/", async (req,res,next)=>{
  *       401: { description: Authentication required }
  *       500: { description: Internal server error }
  */
-router.post("/", async (req,res,next)=>{
+router.post("/", requireSeedToken, async (req,res,next)=>{
     try{
         const body = createPredictionSchema.parse(req.body);
 

@@ -1,9 +1,33 @@
-
 import jwt from "jsonwebtoken";
 import { prisma } from "./db.js";
+import crypto from "crypto";
 
 //rate limiting
 import {rateLimit} from "express-rate-limit";
+
+//post api token
+export function requireSeedToken(req, res, next) {
+    const authHeader = req.headers.authorization;
+    const expectedToken = process.env.RATESIGNAL_API_TOKEN;
+
+    if (!authHeader || !authHeader.startsWith("Bearer ") || !expectedToken) {
+        return res.status(401).json({error: "Unauthorized"});
+    }
+
+    const providedToken = authHeader.slice(7);
+
+    const provided = Buffer.from(providedToken);
+    const expected = Buffer.from(expectedToken);
+
+    if (
+        provided.length != expected.length ||
+        !crypto.timingSafeEqual(provided, expected)
+    ) {
+        return res.status(401).json({error: "Unauthorized"});
+    }
+
+    return next();
+}
 
 //require auth
 export const requireAuth = async (req,res,next) => {
