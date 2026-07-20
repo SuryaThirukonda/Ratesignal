@@ -1,6 +1,15 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
+import { DATA_MAX_DATE } from "../lib/yields";
+
+function displayDate(value) {
+  return new Date(`${value}T00:00:00`).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric"
+  });
+}
 
 export function TopBar() {
   const navigate = useNavigate();
@@ -13,7 +22,10 @@ export function TopBar() {
 
   return (
     <header className="shell-header">
-      <strong className="shell-brand">Ratesignal</strong>
+      <div className="shell-identity">
+        <strong className="shell-brand">Ratesignal</strong>
+        <span className="data-freshness">Data through {displayDate(DATA_MAX_DATE)}</span>
+      </div>
 
       <div className="shell-actions">
         {isAuthenticated ? (

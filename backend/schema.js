@@ -43,14 +43,14 @@ const modelTypeSchema = z.enum([
 //express query comes as string, validate as string, typecast to number
 const horizonSchema = z.preprocess(
   value => typeof value =="string" ? value: String(value),
-  z.enum(["1","5","20"])
+  z.enum(["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"])
 ).transform(value => Number(value));
 
 const sortSchema = z.enum(["asc", "desc"]);
 
 // Validate dates ()
 const dateMinMat = "2001-07-31";
-const dateMaxMat = "2025-05-14";
+const dateMaxMat = "2026-05-14";
 const dateSchema = z.iso.date().refine(date=> date<=dateMaxMat && date>=dateMinMat).transform(value=> new Date(value));
 
 export const getMaturitySchema = z.object({
@@ -83,7 +83,7 @@ export const createMaturitySchemaBatch = z.object({
 
 //predictions schemas
 
-const dateMaxPred = "2025-06-03";
+const dateMaxPred = "2026-06-11";
 const dateSchemaPred = z.iso.date().refine(date=> date<=dateMaxPred && date>=dateMinMat).transform(value => new Date(value));
 
 export const getPredictionSchema = z.object({
@@ -99,7 +99,7 @@ export const getPredictionSchema = z.object({
     value => Array.isArray(value) ? value: [value],
     z.array(modelTypeSchema).min(1).max(13)
   ),
-  horizon: z.preprocess(value => Array.isArray(value)? value: [value], z.array(horizonSchema).min(1))
+  horizon: z.preprocess(value => Array.isArray(value)? value: [value], z.array(horizonSchema).min(1).max(20))
 
 }).refine(
   ({predictedDateMin,predictedDateMax,asOfDate}) => predictedDateMin<=predictedDateMax && asOfDate< predictedDateMin,

@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { DatePicker } from "../components/DatePicker";
 import { CurveChart } from "../components/CurveChart";
-import { fetchYieldCurve } from "../lib/yields";
+import { DATA_MAX_DATE, fetchYieldCurve } from "../lib/yields";
 
-const DEFAULT_DATE = "2019-01-02";
+const DEFAULT_DATE = DATA_MAX_DATE;
 
 function formatNumber(value) {
   return Number.isFinite(value) ? value.toFixed(2) : "0.00";
@@ -32,19 +32,19 @@ function computeStats(points) {
 }
 
 export function DashboardPage() {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const [draftDate, setDraftDate] = useState(DEFAULT_DATE);
   const [activeDate, setActiveDate] = useState(DEFAULT_DATE);
   const [curve, setCurve] = useState([]);
   const [status, setStatus] = useState("idle");
   const [error, setError] = useState("");
 
-  async function loadCurve(date) {
+  const loadCurve = useCallback(async (date) => {
     setStatus("loading");
     setError("");
 
     try {
-      const points = await fetchYieldCurve(date);
+      const points = await fetchYieldCurve(date, token);
       setCurve(points);
       setActiveDate(date);
       setStatus("ready");
@@ -53,11 +53,11 @@ export function DashboardPage() {
       setStatus("error");
       setError(requestError.message || "Unable to load the selected date.");
     }
-  }
+  }, [token]);
 
   useEffect(() => {
     loadCurve(DEFAULT_DATE);
-  }, []);
+  }, [loadCurve]);
 
   function handleSubmit(event) {
     event.preventDefault();

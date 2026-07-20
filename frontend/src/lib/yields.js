@@ -14,7 +14,9 @@ export const MATURITIES = [
   { key: "30Y", label: "30Y" }
 ];
 
-export async function fetchYieldCurve(date) {
+export const DATA_MAX_DATE = "2026-05-14";
+
+export async function fetchYieldCurve(date, token) {
   const params = new URLSearchParams({
     dateMin: date,
     dateMax: date,
@@ -25,7 +27,7 @@ export async function fetchYieldCurve(date) {
     params.append("maturity", maturity.key);
   });
 
-  const records = await apiRequest(`/api/maturities?${params.toString()}`);
+  const records = await apiRequest(`/api/maturities?${params.toString()}`, { token });
 
   if (!Array.isArray(records)) {
     throw new Error("The maturities response was not an array.");
@@ -73,12 +75,17 @@ export async function fetchMaturityHistory({ maturity, dateMin, dateMax, token }
 export const PREDICTION_MODELS = [
   { key: "ar", label: "AR" },
   { key: "var", label: "VAR" },
+  { key: "randomWalk", label: "Random walk" },
   { key: "arXgboost", label: "AR + XGBoost" },
-  { key: "varXgboostMat", label: "VAR + XGBoost (maturity)" },
-  { key: "varXgboostDns", label: "VAR + XGBoost (DNS)" },
-  { key: "arDns", label: "AR + DNS" },
-  { key: "varDns", label: "VAR + DNS" }
+  { key: "varXgboostMat", label: "VAR + XGBoost" }
 ];
+
+export const PREDICTION_AVAILABILITY = {
+  asOfDate: DATA_MAX_DATE,
+  historyDateMin: "2026-04-17",
+  predictedDateMin: "2026-05-15",
+  predictedDateMax: "2026-06-11"
+};
 
 export async function fetchPredictions({
   maturity,
@@ -94,10 +101,14 @@ export async function fetchPredictions({
     asOfDate,
     predictedDateMin,
     predictedDateMax,
-    sortByDate: "asc",
-    modelType,
-    horizon: String(horizon)
+    sortByDate: "asc"
   });
+
+  const modelTypes = Array.isArray(modelType) ? modelType : [modelType];
+  const horizons = Array.isArray(horizon) ? horizon : [horizon];
+
+  modelTypes.forEach((model) => params.append("modelType", model));
+  horizons.forEach((value) => params.append("horizon", String(value)));
 
   const records = await apiRequest(`/api/predictions?${params.toString()}`, { token });
 
